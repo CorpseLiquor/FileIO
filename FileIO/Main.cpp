@@ -4,6 +4,18 @@
 //_getch, _putch, _kbhit
 
 namespace fio {
+	bool isAlphaNumeric( char c ) {
+		if ( c >= 48 && c <= 57 ) {
+			return true;
+		}
+
+		if ( c >= 65 && c <= 122 ) {
+			return true;
+		}
+
+		return false;
+	}
+
 	void print( const char* s ) {
 		for ( ; *s != 0; s++ ) {
 			_putch( *s );
@@ -16,7 +28,7 @@ namespace fio {
 
 		while ( c != 13 && (buf < pEnd) ) {
 			c = _getch();
-			if ( c != 0 ) {
+			if ( isAlphaNumeric(c) ) {
 				_putch( c );
 				*buf = c;
 				buf++;
@@ -32,17 +44,19 @@ namespace fio {
 
 		while ( c != 13 && (buf < pEnd+1) ) {
 			c = _getch();
-			if ( c != 0 ) {
+			if ( isAlphaNumeric(c)) {
 				_putch( c );
 				*buf = c;
 				buf++;
 			}
 		}
-		buf--;
+		
 		while(buf < pEnd ) {
 			*buf = ' ';
 			buf++;
 		}
+
+		buf--;
 
 		*buf = 0;
 	}
@@ -129,8 +143,9 @@ void printChart( nvPair pairs[], const int nameLength, const int valueLength, in
 	for ( int j = 0; j < nvIndex; j++ ) {
 		fio::print( pairs[j].name );
 		fio::print( "|" );
+		const int count = fio::str2int( pairs[j].value );
 
-		for ( int i = 0; i < fio::str2int( pairs[i].value ); i++ ) {
+		for ( int i = 0; i < count; i++ ) {
 			fio::print( "=" );
 		}
 		fio::print( "\n" );
