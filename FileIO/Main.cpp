@@ -28,7 +28,7 @@ namespace fio {
 
 		while ( c != 13 && (buf < pEnd) ) {
 			c = _getch();
-			if ( isAlphaNumeric(c) ) {
+			if ( isAlphaNumeric( c ) ) {
 				_putch( c );
 				*buf = c;
 				buf++;
@@ -42,16 +42,16 @@ namespace fio {
 		const char* const pEnd = buf + maxSize;
 		char c = 0;
 
-		while ( c != 13 && (buf < pEnd+1) ) {
+		while ( c != 13 && (buf < pEnd + 1) ) {
 			c = _getch();
-			if ( isAlphaNumeric(c)) {
+			if ( isAlphaNumeric( c ) ) {
 				_putch( c );
 				*buf = c;
 				buf++;
 			}
 		}
-		
-		while(buf < pEnd ) {
+
+		while ( buf < pEnd ) {
 			*buf = ' ';
 			buf++;
 		}
@@ -127,6 +127,54 @@ struct nvPair {
 	char value[5];
 };
 
+void writeFile( nvPair pairs[], const int nameLength, const int valueLength, const int nvLength ) {
+	std::ofstream out( "nvPairs.txt" );
+	for ( int i = 0; i < nvLength; i++ ) {
+		for ( int j = 0; j < nameLength; j++ ) {
+			if ( pairs[i].name[j] != 0 && (fio::isAlphaNumeric( pairs[i].name[j] ) || pairs[i].name[j] == 32 )) {
+				out.put( pairs[i].name[j] );
+			}
+		}
+		out.put( ',' );
+		for ( int j = 0; j < valueLength; j++ ) {
+			if ( pairs[i].value[j] != 0 && fio::isAlphaNumeric( pairs[i].value[j] ) ) {
+				out.put( pairs[i].value[j] );
+			}
+		}
+		out.put( ',' );
+	}
+	out.close();
+}
+
+int readFile( nvPair pairs[], const int nameLength, const int valueLength ) {
+	std::ifstream in( "nvPairs.txt" );
+	bool readingName = true;
+	int nvIndex = 0;
+	int charIndex = 0;
+
+	while ( in.good() ) {
+		char c = in.get();
+		if ( c == ',' ) {
+			readingName = !readingName;
+			charIndex = 0;
+			if ( readingName )
+				nvIndex++;
+		} else {
+			if ( readingName ) {
+				pairs[nvIndex].name[charIndex] = c;
+				pairs[nvIndex].name[charIndex + 1] = 0;
+				charIndex++;
+			} else {
+				pairs[nvIndex].value[charIndex] = c;
+				pairs[nvIndex].value[charIndex + 1] = 0;
+				charIndex++;
+			}
+		}
+	}
+
+	return nvIndex;
+}
+
 void addNVPair( nvPair pairs[], const int nameLength, const int valueLength, const int nvIndex ) {
 	fio::print( "Enter name: " );
 	fio::readw( pairs[nvIndex].name, nameLength );
@@ -161,8 +209,10 @@ int main() {
 	while ( 1 ) {
 		switch ( showMenu() ) {
 		case 'l':
+			nvIndex = readFile( pairs, 10, 5 );
 			break;
 		case 's':
+			writeFile( pairs, 10, 5, nvIndex );
 			break;
 		case 'a':
 			addNVPair( pairs, 10, 5, nvIndex );
